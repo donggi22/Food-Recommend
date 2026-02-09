@@ -9,7 +9,7 @@ Flask + SQLite로 구성된 로컬 실행용 프로젝트입니다.
 cd ~/Desktop
 
 # 프로젝트 클론 (다운로드)
-git clone https://github.com/donggi22/Food-Recommend-taste-mate
+git clone https://github.com/donggi22/Food-Recommend
 ```
 
 ## 실행 방법
