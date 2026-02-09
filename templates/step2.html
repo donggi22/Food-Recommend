@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>2단계</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 720px;
+      margin: 40px auto;
+      padding: 0 16px;
+    }
+    .meta { color:#666; margin: 10px 0 16px; }
+    .btns { display:grid; gap:10px; }
+    button { padding: 14px 16px; width: 100%; font-size:16px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>2/3</h1>
+    <div class="meta">
+      선택한 조건: <b>{{ mood }}</b> / user_id: <b>{{ user_id }}</b>
+    </div>
+
+    <form method="post" action="/results">
+      <input type="hidden" name="user_id" value="{{ user_id }}" />
+      <input type="hidden" name="mood" value="{{ mood }}" />
+
+      <div class="btns">
+        {% for e in emotions %}
+          <button type="submit" name="emotion" value="{{ e }}">{{ e }}</button>
+        {% endfor %}
+      </div>
+    </form>
+
+    <p style="margin-top:20px;"><a href="/">처음으로</a></p>
+  </main>
+</body>
+</html>

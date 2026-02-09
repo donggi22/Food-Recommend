@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>3단계 - 추천</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 16px; }
+    .meta { color:#666; font-size: 14px; margin-bottom: 12px; }
+    .card { border: 1px solid #ddd; border-radius: 12px; padding: 14px; margin: 12px 0; }
+    button { margin-top: 10px; padding: 10px 12px; }
+  </style>
+</head>
+<body>
+  <h1>3/3 추천 결과</h1>
+  <p class="meta">
+    식사 욕구: <b>{{ context.mood }}</b> /
+    현재의 감정: <b>{{ context.emotion }}</b>
+  </p>
+
+  {% if items|length == 0 %}
+    <p>조건에 맞는 후보가 없습니다.</p>
+    <p><a href="/">처음으로</a></p>
+  {% else %}
+    <p>아래 중 하나를 선택해 주세요.</p>
+
+    {% for it in items %}
+      <div class="card">
+        <div><b>{{ it.name }}</b> <span class="meta">({{ it.category }})</span></div>
+        <div class="meta">
+          예상시간: {{ it.eta_min }}분
+        </div>
+
+        <form method="post" action="/select">
+          <input type="hidden" name="user_id" value="{{ user_id }}" />
+          <input type="hidden" name="chosen_item_id" value="{{ it.item_id }}" />
+          <input type="hidden" name="context_json" value='{{ context_json | e }}' />
+          <input type="hidden" name="recommended_ids_json" value='{{ recommended_ids_json | e }}' />
+          <button type="submit">이걸로 선택</button>
+        </form>
+      </div>
+    {% endfor %}
+
+    <p><a href="/">다시 하기</a></p>
+  {% endif %}
+</body>
+</html>
