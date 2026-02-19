@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>추천 사유 테스트</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0f0f12;
+      --surface: #1a1a1f;
+      --border: #2a2a32;
+      --text: #e8e8ed;
+      --muted: #8888a0;
+      --accent: #6b8afd;
+      --accent-hover: #5a7aeb;
+      --success: #4ade80;
+      --error: #f87171;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Noto Sans KR", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 560px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+    .sub {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .card h2 {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+    select {
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      font-size: 0.95rem;
+      font-family: inherit;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      cursor: pointer;
+    }
+    .context-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+    .context-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .context-item span:first-child {
+      color: var(--muted);
+      min-width: 5rem;
+    }
+    .context-item span:last-child {
+      font-weight: 500;
+    }
+    .topk {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .topk strong { color: var(--text); }
+    .btn {
+      width: 100%;
+      padding: 0.9rem 1.25rem;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: var(--accent-hover); }
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .result {
+      margin-top: 1rem;
+      border-left: 4px solid var(--accent);
+    }
+    .result .menu-name {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .result .reason {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 0.5rem;
+    }
+    .result .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+    .result .tags span {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      background: var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+    }
+    .output-block {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background: var(--bg);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 0.8rem;
+      font-family: ui-monospace, monospace;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: var(--muted);
+    }
+    .validation {
+      margin-top: 1rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border);
+    }
+    .validation-item {
+      font-size: 0.85rem;
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .validation-item .ok { color: var(--success); }
+    .validation-item .fail { color: var(--error); }
+    .btn-group { display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap; }
+    .btn-group .btn { flex: 1; min-width: 160px; }
+    .ranker-list { margin: 0; padding-left: 1.25rem; font-size: 0.95rem; line-height: 1.6; }
+    .ranker-list li { margin-bottom: 0.25rem; }
+    .error {
+      color: var(--error);
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+    .loading {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .banner {
+      background: #1e3a5f;
+      border: 1px solid var(--accent);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      margin-bottom: 1.25rem;
+      font-size: 0.85rem;
+      color: #b8d4ff;
+    }
+    .banner code { background: rgba(0,0,0,0.3); padding: 0.2rem 0.4rem; border-radius: 4px; }
+    .api-row { display: flex; gap: 0.5rem; align-items: center; margin-top: 0.5rem; }
+    .api-row input { flex: 1; padding: 0.4rem 0.5rem; font-size: 0.85rem; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); }
+    .api-row button { padding: 0.4rem 0.75rem; font-size: 0.85rem; cursor: pointer; background: var(--border); border: none; border-radius: 6px; color: var(--text); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>추천 사유 테스트</h1>
+    <p class="sub">테스트 케이스를 고르고 추천 결과를 확인하세요.</p>
+
+    <div class="banner" id="banner">
+      서버 실행 후 이 주소로 접속하세요: <code id="hintUrl">http://127.0.0.1:8000/</code><br />
+      <span class="api-row">
+        <label style="margin:0; min-width:4rem;">API 주소</label>
+        <input type="text" id="apiBase" placeholder="비우면 현재 페이지 주소 사용" value="" />
+        <button type="button" id="btnReload">적용 후 새로고침</button>
+      </span>
+    </div>
+
+    <div class="card">
+      <h2>테스트 케이스</h2>
+      <label for="case">케이스 선택</label>
+      <select id="case">
+        <option value="">로딩 중…</option>
+      </select>
+    </div>
+
+    <div class="card" id="contextCard">
+      <h2>현재 상황 (context)</h2>
+      <div class="context-grid" id="contextGrid"></div>
+      <p class="topk" id="topk"></p>
+    </div>
+
+    <div class="card">
+      <h2>추천 요청</h2>
+      <div class="btn-group">
+        <button type="button" class="btn" id="btnRanker">룰 랭커 결과 보기</button>
+        <button type="button" class="btn" id="btnRecommend">추천 + 사유 받기</button>
+      </div>
+      <p class="error" id="error"></p>
+      <p class="loading" id="loading" style="display:none;">요청 중…</p>
+    </div>
+
+    <div class="card" id="rankerResultCard" style="display:none;">
+      <h2>룰 랭커 결과 (top_k)</h2>
+      <p class="sub" style="margin-bottom:0.5rem;">context + candidates → 랭커가 뽑은 상위 K개 메뉴 (순서대로)</p>
+      <ol class="ranker-list" id="rankerList"></ol>
+    </div>
+
+    <div class="card result" id="resultCard" style="display:none;">
+      <h2>추천 + 사유 결과</h2>
+      <div class="menu-name" id="menuName"></div>
+      <div class="reason" id="reason"></div>
+      <div class="tags" id="tags"></div>
+      <p class="error" id="fallbackNotice" style="display:none; margin-top:0.75rem; font-size:0.8rem;"></p>
+      <h3 style="font-size:0.85rem; color:var(--muted); margin-top:1rem; margin-bottom:0.5rem;">LLM 추천 아웃풋 (원본)</h3>
+      <pre class="output-block" id="outputRaw"></pre>
+      <h3 style="font-size:0.85rem; color:var(--muted); margin-top:0.75rem; margin-bottom:0.5rem;">검증</h3>
+      <div class="validation" id="validation"></div>
+    </div>
+  </div>
+
+  <script>
+    const select = document.getElementById('case');
+    const contextGrid = document.getElementById('contextGrid');
+    const topkEl = document.getElementById('topk');
+    const btnRanker = document.getElementById('btnRanker');
+    const btnRecommend = document.getElementById('btnRecommend');
+    const errorEl = document.getElementById('error');
+    const rankerResultCard = document.getElementById('rankerResultCard');
+    const rankerList = document.getElementById('rankerList');
+    const loadingEl = document.getElementById('loading');
+    const resultCard = document.getElementById('resultCard');
+    const menuNameEl = document.getElementById('menuName');
+    const reasonEl = document.getElementById('reason');
+    const tagsEl = document.getElementById('tags');
+    const outputRaw = document.getElementById('outputRaw');
+    const validationEl = document.getElementById('validation');
+    const apiBaseInput = document.getElementById('apiBase');
+    const hintUrl = document.getElementById('hintUrl');
+
+    function getBase() {
+      const saved = localStorage.getItem('recommend_api_base');
+      const fromInput = (apiBaseInput && apiBaseInput.value) ? apiBaseInput.value.trim() : '';
+      if (fromInput) return fromInput.replace(/\/$/, '');
+      if (saved) return saved;
+      if (typeof window !== 'undefined' && window.location && window.location.origin && !window.location.origin.startsWith('file')) return window.location.origin;
+      return 'http://127.0.0.1:8000';
+    }
+    let base = getBase();
+    if (apiBaseInput) apiBaseInput.placeholder = base;
+    if (hintUrl) hintUrl.textContent = base + '/';
+
+    document.getElementById('btnReload').addEventListener('click', () => {
+      const v = apiBaseInput.value.trim().replace(/\/$/, '');
+      if (v) localStorage.setItem('recommend_api_base', v);
+      else localStorage.removeItem('recommend_api_base');
+      window.location.reload();
+    });
+
+    let testCases = [];
+    let candidates = [];
+    const idToMenu = () => {
+      const m = {};
+      candidates.forEach(c => { m[c.menu_id] = c; });
+      return m;
+    };
+
+    function renderContext(ctx) {
+      const items = [
+        ['meal_slot', '식사 시간'],
+        ['hunger_level', '허기'],
+        ['mood', '기분'],
+        ['company', '함께'],
+        ['effort_level', '노력'],
+        ['budget_range', '예산'],
+      ];
+      contextGrid.innerHTML = items.map(([key, label]) =>
+        `<div class="context-item"><span>${label}</span><span>${ctx[key]}</span></div>`
+      ).join('');
+      if (ctx.recent_meals && ctx.recent_meals.length) {
+        const recent = ctx.recent_meals.map(r => `${r.menu}(${r.days_ago}일 전)`).join(', ');
+        contextGrid.innerHTML += `<div class="context-item" style="grid-column:1/-1"><span>최근 식사</span><span>${recent}</span></div>`;
+      }
+      if (ctx.weather) {
+        const w = ctx.weather;
+        const condKo = { clear: '맑음', rain: '비', snow: '눈', cloudy: '흐림' }[w.condition] || w.condition;
+        const temp = w.temp_c != null ? `${w.temp_c}°C` : '';
+        contextGrid.innerHTML += `<div class="context-item" style="grid-column:1/-1"><span>날씨</span><span>${condKo} ${temp}</span></div>`;
+      }
+    }
+
+    const CONTEXT_KEYS = ['meal_slot', 'mood', 'company', 'effort_level'];
+    const WEATHER_KO = { clear: '맑', rain: '비', snow: '눈', cloudy: '흐림' };
+    const MIN_LEN = 25, MAX_LEN = 45;
+
+    function checkContextKeywords(ctx, reason) {
+      const found = [];
+      CONTEXT_KEYS.forEach(key => {
+        const val = ctx[key];
+        if (val && reason.indexOf(String(val)) !== -1) found.push(key);
+      });
+      if (ctx.weather && typeof ctx.weather === 'object') {
+        const cond = (ctx.weather.condition || '').toLowerCase();
+        const temp = ctx.weather.temp_c;
+        if (cond && reason.indexOf(cond) !== -1) found.push('weather');
+        else if (WEATHER_KO[cond] && reason.indexOf(WEATHER_KO[cond]) !== -1) found.push('weather');
+        else if (reason.indexOf('날씨') !== -1) found.push('weather');
+        else if (temp != null && temp < 10 && /추운|춥|쌀쌀|한파/.test(reason)) found.push('weather');
+        else if (temp != null && temp > 26 && /더운|더움|무더/.test(reason)) found.push('weather');
+      }
+      return found;
+    }
+
+    function renderValidation(data, topK, context) {
+      const reason = data.reason_one_liner || '';
+      const len = reason.length;
+      const inTopK = topK && topK.indexOf(data.selected_menu_id) !== -1;
+      const keywords = checkContextKeywords(context, reason);
+      const lenOk = len >= MIN_LEN && len <= MAX_LEN;
+      const kwOk = keywords.length >= 2;
+      let html = '';
+      html += '<div class="validation-item">' + (inTopK ? '<span class="ok">✓</span>' : '<span class="fail">✗</span>') + ' selected_menu_id가 top_k 안에 있음: ' + (inTopK ? '예' : '아니오') + '</div>';
+      html += '<div class="validation-item">' + (lenOk ? '<span class="ok">✓</span>' : '<span class="fail">✗</span>') + ' 사유 길이 25~45자: ' + len + '자 ' + (lenOk ? '' : '(기준 미달)') + '</div>';
+      html += '<div class="validation-item">' + (kwOk ? '<span class="ok">✓</span>' : '<span class="fail">✗</span>') + ' context 키워드 2개 이상 반영: ' + (keywords.length ? keywords.join(', ') : '없음') + '</div>';
+      validationEl.innerHTML = html;
+    }
+
+    function onCaseChange() {
+      const idx = parseInt(select.value, 10);
+      if (Number.isNaN(idx) || idx < 0) return;
+      const tc = testCases[idx];
+      renderContext(tc.context);
+      topkEl.innerHTML = '';
+      resultCard.style.display = 'none';
+      rankerResultCard.style.display = 'none';
+      errorEl.textContent = '';
+    }
+
+    async function load() {
+      try {
+        const [casesRes, candRes] = await Promise.all([
+          fetch(base + '/v1/test-cases'),
+          fetch(base + '/v1/candidates'),
+        ]);
+        if (!casesRes.ok || !candRes.ok) throw new Error('데이터 로드 실패');
+        testCases = await casesRes.json();
+        candidates = await candRes.json();
+      } catch (e) {
+        select.innerHTML = '<option value="">데이터 로드 실패</option>';
+        errorEl.textContent = '서버에 연결할 수 없습니다. 터미널에서: cd ai_plus && .venv/bin/uvicorn app.main:app --port 8000 후 ' + base + ' 로 접속하세요.';
+        return;
+      }
+      select.innerHTML = testCases.map((_, i) =>
+        `<option value="${i}">Case ${i + 1}</option>`
+      ).join('');
+      select.addEventListener('change', onCaseChange);
+      onCaseChange();
+    }
+
+    async function runRanker() {
+      const idx = parseInt(select.value, 10);
+      if (Number.isNaN(idx) || idx < 0) return;
+      const tc = testCases[idx];
+      errorEl.textContent = '';
+      rankerResultCard.style.display = 'none';
+      resultCard.style.display = 'none';
+      loadingEl.style.display = 'block';
+      btnRanker.disabled = true;
+      btnRecommend.disabled = true;
+      try {
+        const res = await fetch(base + '/v1/top-k', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ context: tc.context, candidates: candidates, k: 5 }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          errorEl.textContent = typeof data.detail === 'string' ? data.detail : (res.status + ' 오류');
+          return;
+        }
+        const menuMap = idToMenu();
+        rankerList.innerHTML = (data.top_k || []).map((id, i) => {
+          const m = menuMap[id];
+          const name = m ? `${m.menu_name} (${m.category})` : 'menu_id ' + id;
+          return '<li>' + name + '</li>';
+        }).join('');
+        rankerResultCard.style.display = 'block';
+      } catch (e) {
+        errorEl.textContent = '요청 실패: ' + e.message;
+      } finally {
+        loadingEl.style.display = 'none';
+        btnRanker.disabled = false;
+        btnRecommend.disabled = false;
+      }
+    }
+
+    async function runRecommend() {
+      const idx = parseInt(select.value, 10);
+      if (Number.isNaN(idx) || idx < 0) return;
+      const tc = testCases[idx];
+      errorEl.textContent = '';
+      resultCard.style.display = 'none';
+      loadingEl.style.display = 'block';
+      btnRanker.disabled = true;
+      btnRecommend.disabled = true;
+      let data, topK;
+      try {
+        const res = await fetch(base + '/v1/recommend', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ context: tc.context, candidates: candidates, k: 5 }),
+        });
+        data = await res.json().catch(() => ({}));
+        topK = data.top_k_used || null;
+        if (!res.ok) {
+          errorEl.textContent = typeof data.detail === 'string' ? data.detail : (Array.isArray(data.detail) && data.detail[0]?.msg) ? data.detail[0].msg : (res.status + ' 오류');
+          return;
+        }
+        const menu = idToMenu()[data.selected_menu_id];
+        menuNameEl.textContent = menu ? `${menu.menu_name} (${menu.category})` : 'menu_id ' + data.selected_menu_id;
+        reasonEl.textContent = data.reason_one_liner || '';
+        tagsEl.innerHTML = (data.reason_tags || []).map(t => `<span>${t}</span>`).join('');
+        const isFallback = (data.reason_tags || []).includes('fallback');
+        const fallbackNotice = document.getElementById('fallbackNotice');
+        if (fallbackNotice) {
+          fallbackNotice.style.display = isFallback ? 'block' : 'none';
+          fallbackNotice.textContent = isFallback
+            ? '⚠️ LLM이 호출되지 않았습니다. .env에 OPENAI_API_KEY나 Vertex AI API가 있는지 확인하고, 서버를 재시작한 뒤 다시 시도하세요.'
+            : '';
+        }
+        outputRaw.textContent = JSON.stringify({
+          selected_menu_id: data.selected_menu_id,
+          reason_one_liner: data.reason_one_liner,
+          reason_tags: data.reason_tags,
+          top_k_used: data.top_k_used,
+        }, null, 2);
+        renderValidation(data, topK, tc.context);
+        resultCard.style.display = 'block';
+      } catch (e) {
+        errorEl.textContent = '요청 실패: ' + e.message;
+      } finally {
+        loadingEl.style.display = 'none';
+        btnRanker.disabled = false;
+        btnRecommend.disabled = false;
+      }
+    }
+
+    btnRanker.addEventListener('click', runRanker);
+    btnRecommend.addEventListener('click', runRecommend);
+
+    load();
+  </script>
+</body>
+</html>
